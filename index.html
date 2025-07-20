@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <style>*{background-position: right !important;}</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bober Clicker</title>
+  <link rel="icon" href="https://cdn.discordapp.com/attachments/1395092117369655326/1395373827537764432/Neues_Projekt_1.png?ex=687a36a5&is=6878e525&hm=9734026603689f7a05137a621a24f1b5b99c25f081f41029b970752ccfb1ae42&" type="image/x-icon">
+  <style>
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f2f2f2;
+      margin: 0;
+      padding: 2rem;
+      overflow-x: hidden;
+    }
+
+    h1, h2 {
+      color: #333;
+    }
+
+    #bober {
+      height: 128px;
+      width: 192px;
+      background-image: url('https://static.giga.de/wp-content/uploads/2024/04/kurwa-bober-GettyImages-92911783.jpg');
+      background-size: cover;
+      background-position: center;
+      border: none;
+      border-radius: 64px;
+      cursor: pointer;
+      font-size: 28px;
+      color: white;
+      text-shadow: 2px 2px 2px black;
+      transition: transform 0.1s ease;
+      position: relative;
+      z-index: 1;
+      overflow: visible;
+    }
+
+    #bober:hover {
+      transform: scale(1.1);
+    }
+
+    .coin-counter {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .upgrade-container {
+      margin-top: 2rem;
+    }
+
+    .upgrade {
+      display: flex;
+      align-items: center;
+      background: #ddd;
+      padding: 1rem;
+      border-radius: 16px;
+      margin: 1rem auto;
+      cursor: pointer;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+      width: 320px;
+      user-select: none;
+      position: relative;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      flex-direction: row; /* Bild links, Text rechts */
+    }
+
+    .upgrade:hover {
+      background-color: #eee;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    }
+
+    .upgrade-image {
+      flex-shrink: 0;
+      width: 100px;
+      height: 100px;
+      border-radius: 20px 0 0 20px;
+      background-image: url('https://static.giga.de/wp-content/uploads/2024/04/kurwa-bober-GettyImages-92911783.jpg');
+      background-size: cover;
+      background-position: center;
+      filter: brightness(99.9%);
+    }
+
+    .upgrade-content {
+      text-align: right;
+      flex-grow: 1;
+      color: #222;
+      padding-left: 1rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .bober-particle {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      background-image: url(bober-transparent.png);
+      background-size: contain;
+      background-repeat: no-repeat;
+      pointer-events: none;
+      opacity: 0.7;
+      animation: flyAway 1s forwards;
+      z-index: 100;
+    }
+
+    @keyframes flyAway {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(2) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(var(--x), var(--y)) scale(1) rotate(360deg);
+      }
+    }
+
+    #soundToggle {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      background: #444;
+      border: none;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      font-size: 24px;
+      color: white;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: 0 0 8px rgba(0,0,0,0.3);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #secretCodeContainer {
+      margin-top: 2rem;
+    }
+
+    #secretInput {
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+
+    #submitCode {
+      padding: 0.5rem;
+      font-size: 1rem;
+      margin-left: 0.5rem;
+    }
+
+    #codeMessage {
+      margin-top: 0.5rem;
+      font-weight: bold;
+    }
+
+    .disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="adminPanel" style="display:none; margin-top: 2rem; background:#222; color:white; padding:1rem; border-radius:10px;">
+    <h2>🛠️ Admin Panel</h2>
+    <button onclick="boberCoins += 100000; updateDisplay(); saveGame();">+100000 Coins</button>
+    <button onclick="boberCoins -= 100000; if(boberCoins<0)boberCoins=0; updateDisplay(); saveGame();">-100000 Coins</button>
+    <br><br>
+    <button onclick="
+      priceClick = 0;
+      priceAuto = 0;
+      priceBoost = 0;
+      priceSuper = 0;
+      priceFactory = 0;
+      document.getElementById('priceClick').innerText = priceClick;
+      document.getElementById('priceAuto').innerText = priceAuto;
+      document.getElementById('priceBoost').innerText = priceBoost;
+      document.getElementById('priceSuper').innerText = priceSuper;
+      document.getElementById('priceFactory').innerText = priceFactory;
+      updateDisplay(); saveGame();
+    ">All Upgrades </button>
+    <br><br>
+    <label>Click Power: <input type="number" id="setClickPower" value="1" style="width: 80px;"></label>
+    <button onclick="clickPower = parseInt(document.getElementById('setClickPower').value); updateDisplay(); saveGame();">Set</button><br><br>
+  
+    <label>Auto Power: <input type="number" id="setAutoPower" value="0" style="width: 80px;"></label>
+    <button onclick="autoPower = parseInt(document.getElementById('setAutoPower').value); updateDisplay(); saveGame();">Set</button><br><br>
+  
+    <label>Factory Power: <input type="number" id="setFactoryPower" value="0" style="width: 80px;"></label>
+    <button onclick="factoryPower = parseInt(document.getElementById('setFactoryPower').value); updateDisplay(); saveGame();">Set</button>
+  </div>
+  
+  <h1>Bober Clicker</h1>
+  <div class="coin-counter">Bober Coins: <span id="boberCoins">0</span></div>
+  <button id="bober" aria-label="Click Bober!">Click Bober!</button>
+
+  <div class="upgrade-container" aria-label="Upgrades">
+    <h2>Upgrades</h2>
+
+    <div id="upgradeClick" class="upgrade" role="button" tabindex="0">
+      <div class="upgrade-image"></div>
+      <div class="upgrade-content">
+        Click Power +1<br>
+        <small>Cost: <span id="priceClick">10</span></small>
+      </div>
+    </div>
+
+    <div id="upgradeAuto" class="upgrade" role="button" tabindex="0">
+      <div class="upgrade-image"></div>
+      <div class="upgrade-content">
+        Auto Click (+1/sec)<br>
+        <small>Cost: <span id="priceAuto">50</span></small>
+      </div>
+    </div>
+
+    <div id="upgradeBoost" class="upgrade" role="button" tabindex="0">
+      <div class="upgrade-image"></div>
+      <div class="upgrade-content">
+        Mega Boost (2x Power for 10s)<br>
+        <small>Cost: <span id="priceBoost">100</span></small>
+      </div>
+    </div>
+
+    <div id="upgradeSuper" class="upgrade" role="button" tabindex="0">
+      <div class="upgrade-image"></div>
+      <div class="upgrade-content">
+        Super Upgrade (+5 Power)<br>
+        <small>Cost: <span id="priceSuper">200</span></small>
+      </div>
+    </div>
+
+    <div id="upgradeFactory" class="upgrade" role="button" tabindex="0">
+      <div class="upgrade-image"></div>
+      <div class="upgrade-content">
+        Bober Factory (+10/sec)<br>
+        <small>Cost: <span id="priceFactory">1000</span></small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Secret Code Section -->
+  <div id="secretCodeContainer">
+    <h2>Secret Code</h2>
+    <input type="text" id="secretInput" placeholder="Enter secret code..." />
+    <button id="submitCode">Submit</button>
+    <p id="codeMessage"></p>
+  </div>
+
+  <button id="soundToggle" aria-label="Toggle sound">🔊</button>
+
+  <script>
+    let boberCoins = 0;
+    let clickPower = 1;
+    let autoPower = 0;
+    let factoryPower = 0;
+    let isBoosted = false;
+    let soundEnabled = true;
+
+    let priceClick = 10;
+    let priceAuto = 50;
+    let priceBoost = 100;
+    let priceSuper = 200;
+    let priceFactory = 1000;
+
+    const coinDisplay = document.getElementById("boberCoins");
+    const boberBtn = document.getElementById("bober");
+
+    const upgradeClick = document.getElementById("upgradeClick");
+    const upgradeAuto = document.getElementById("upgradeAuto");
+    const upgradeBoost = document.getElementById("upgradeBoost");
+    const upgradeSuper = document.getElementById("upgradeSuper");
+    const upgradeFactory = document.getElementById("upgradeFactory");
+
+    const soundToggleBtn = document.getElementById("soundToggle");
+
+    const secretInput = document.getElementById("secretInput");
+    const submitCode = document.getElementById("submitCode");
+    const codeMessage = document.getElementById("codeMessage");
+
+    const clickSound = new Audio('bober.mp3');
+    clickSound.volume = 0.7;
+
+    let secretUsed499 = localStorage.getItem("secret499used") === "true";
+    let secretUsedBoberClicker = localStorage.getItem("secretBoberClickerUsed") === "true";
+
+    function loadGame() {
+      const saved = JSON.parse(localStorage.getItem("boberSave"));
+      if (saved) {
+        boberCoins = saved.boberCoins ?? boberCoins;
+        clickPower = saved.clickPower ?? clickPower;
+        autoPower = saved.autoPower ?? autoPower;
+        factoryPower = saved.factoryPower ?? factoryPower;
+        priceClick = saved.priceClick ?? priceClick;
+        priceAuto = saved.priceAuto ?? priceAuto;
+        priceBoost = saved.priceBoost ?? priceBoost;
+        priceSuper = saved.priceSuper ?? priceSuper;
+        priceFactory = saved.priceFactory ?? priceFactory;
+        soundEnabled = saved.soundEnabled ?? soundEnabled;
+      }
+    }
+
+    function saveGame() {
+      const saveData = {
+        boberCoins,
+        clickPower,
+        autoPower,
+        factoryPower,
+        priceClick,
+        priceAuto,
+        priceBoost,
+        priceSuper,
+        priceFactory,
+        soundEnabled
+      };
+      localStorage.setItem("boberSave", JSON.stringify(saveData));
+    }
+
+    function playClickSound() {
+      if (soundEnabled && clickSound.paused) {
+        clickSound.currentTime = 0;
+        clickSound.play();
+      }
+    }
+
+    boberBtn.addEventListener("click", (e) => {
+      let power = clickPower;
+      if (isBoosted) power *= 2;
+      boberCoins += power;
+      playClickSound();
+      updateDisplay();
+      spawnParticles(e);
+      saveGame();
+    });
+
+    upgradeClick.addEventListener("click", () => {
+      if (boberCoins >= priceClick) {
+        boberCoins -= priceClick;
+        clickPower += 1;
+        priceClick = Math.floor(priceClick * 1.5);
+        document.getElementById("priceClick").innerText = priceClick;
+        playClickSound();
+        updateDisplay();
+        saveGame();
+      }
+    });
+
+    upgradeAuto.addEventListener("click", () => {
+      if (boberCoins >= priceAuto) {
+        boberCoins -= priceAuto;
+        autoPower += 1;
+        priceAuto = Math.floor(priceAuto * 1.8);
+        document.getElementById("priceAuto").innerText = priceAuto;
+        playClickSound();
+        updateDisplay();
+        saveGame();
+      }
+    });
+
+    upgradeBoost.addEventListener("click", () => {
+      if (boberCoins >= priceBoost && !isBoosted) {
+        boberCoins -= priceBoost;
+        isBoosted = true;
+        let originalPower = clickPower;
+        clickPower *= 2;
+        playClickSound();
+        updateDisplay();
+        saveGame();
+        setTimeout(() => {
+          clickPower = originalPower;
+          isBoosted = false;
+          updateDisplay();
+          saveGame();
+        }, 10000);
+      }
+    });
+
+    upgradeSuper.addEventListener("click", () => {
+      if (boberCoins >= priceSuper) {
+        boberCoins -= priceSuper;
+        clickPower += 5;
+        priceSuper = Math.floor(priceSuper * 2);
+        document.getElementById("priceSuper").innerText = priceSuper;
+        playClickSound();
+        updateDisplay();
+        saveGame();
+      }
+    });
+
+    upgradeFactory.addEventListener("click", () => {
+      if (boberCoins >= priceFactory) {
+        boberCoins -= priceFactory;
+        factoryPower += 10;
+        priceFactory = Math.floor(priceFactory * 2);
+        document.getElementById("priceFactory").innerText = priceFactory;
+        playClickSound();
+        updateDisplay();
+        saveGame();
+      }
+    });
+
+    setInterval(() => {
+      boberCoins += autoPower + factoryPower;
+      updateDisplay();
+      saveGame();
+    }, 1000);
+
+    function updateDisplay() {
+      coinDisplay.innerText = boberCoins;
+      toggleButton(upgradeClick, boberCoins >= priceClick);
+      toggleButton(upgradeAuto, boberCoins >= priceAuto);
+      toggleButton(upgradeBoost, boberCoins >= priceBoost && !isBoosted);
+      toggleButton(upgradeSuper, boberCoins >= priceSuper);
+      toggleButton(upgradeFactory, boberCoins >= priceFactory);
+      soundToggleBtn.textContent = soundEnabled ? "🔊" : "🔇";
+    }
+
+    function toggleButton(element, enabled) {
+      element.classList.toggle("disabled", !enabled);
+    }
+
+    function spawnParticles(event) {
+      const particle = document.createElement("div");
+      particle.classList.add("bober-particle");
+      const rect = boberBtn.getBoundingClientRect();
+      particle.style.left = rect.left + rect.width / 2 + "px";
+      particle.style.top = rect.top + rect.height / 2 + "px";
+      const angle = Math.random() * 2 * Math.PI;
+      const distance = 150;
+      const x = Math.cos(angle) * distance;
+      const y = Math.sin(angle) * distance;
+      particle.style.setProperty("--x", `${x}px`);
+      particle.style.setProperty("--y", `${y}px`);
+      document.body.appendChild(particle);
+      setTimeout(() => particle.remove(), 1000);
+    }
+
+    soundToggleBtn.addEventListener("click", () => {
+      soundEnabled = !soundEnabled;
+      updateDisplay();
+      saveGame();
+    });
+
+    // Secret code logic
+    submitCode.addEventListener("click", () => {
+      const code = secretInput.value.trim();
+      if (code === "499") {
+        if (!secretUsed499) {
+          boberCoins += 10000;
+          secretUsed499 = true;
+          localStorage.setItem("secret499used", "true");
+          codeMessage.textContent = "✅ Code accepted! 10,000 coins added.";
+          codeMessage.style.color = "green";
+          updateDisplay();
+          saveGame();
+          secretInput.value = "";
+        } else {
+          codeMessage.textContent = "⚠️ Code already used!";
+          codeMessage.style.color = "red";
+        }
+      } else if (code.toLowerCase() === "bober clicker") {
+        if (!secretUsedBoberClicker) {
+          clickPower += 100;
+          secretUsedBoberClicker = true;
+          localStorage.setItem("secretBoberClickerUsed", "true");
+          codeMessage.textContent = "✅ Click Power massively increased!";
+          codeMessage.style.color = "green";
+          updateDisplay();
+          saveGame();
+          secretInput.value = "";
+        } else {
+          codeMessage.textContent = "⚠️ Code already used!";
+          codeMessage.style.color = "red";
+        }
+      } else {
+        codeMessage.textContent = "❌ Invalid code!";
+        codeMessage.style.color = "red";
+      }
+    });
+
+    // Enable keyboard accessibility for upgrade buttons
+    [upgradeClick, upgradeAuto, upgradeBoost, upgradeSuper, upgradeFactory].forEach(upgrade => {
+      upgrade.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          upgrade.click();
+        }
+      });
+    });
+
+    loadGame();
+    updateDisplay();
+    
+  </script>
+</body>
+</html>
+/bin/Release/android/
+
